@@ -1,0 +1,47 @@
+# no trigger config here, this is handled at Azure Pipelines interface
+
+steps:
+- checkout: self
+
+- task: PowerShell@2
+  inputs:
+      targetType: 'inline'
+      script: |
+
+          # check git versions
+          git --version
+
+          # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
+          # 'encoded token' is the Base64 of the string "nfbot:personal-token"
+          $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)"))))"
+
+          # config git
+          git config user.email 'nanoframework@outlook.com'
+          git config user.name 'nfbot'
+
+          # set upstream
+          git remote add upstream https://github.com/ChibiOS/ChibiOS.git
+
+          # checkout master branch
+          git checkout master
+
+          # fetch changes from SVN repo
+          git pull upstream master
+
+          # need to add authorization extra header to be able to commit
+          git -c http.extraheader="AUTHORIZATION: $auth" push origin
+    
+          # checkout stable_19.1.x branch
+          git checkout stable_19.1.x
+          git pull upstream stable_19.1.x
+          git -c http.extraheader="AUTHORIZATION: $auth" push origin
+    
+          # checkout stable_20.3.x branch
+          git checkout stable_20.3.x
+          git pull upstream stable_20.3.x
+          git -c http.extraheader="AUTHORIZATION: $auth" push origin
+
+      ignoreLASTEXITCODE: true
+      failOnStderr: false
+      
+  displayName: Update repository from ChibiOS mirror
