@@ -40,6 +40,11 @@ steps:
           git checkout stable_20.3.x
           git pull upstream stable_20.3.x
           git -c http.extraheader="AUTHORIZATION: $auth" push origin
+          
+          # checkout stable_21.6.x branch
+          git checkout stable_21.6.x
+          git pull upstream stable_21.6.x
+          git -c http.extraheader="AUTHORIZATION: $auth" push origin
 
       ignoreLASTEXITCODE: true
       failOnStderr: false
